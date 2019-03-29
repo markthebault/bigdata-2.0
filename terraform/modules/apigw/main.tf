@@ -8,6 +8,20 @@ resource "aws_api_gateway_resource" "proxy" {
   path_part   = "{proxy+}"
 }
 
+resource "aws_api_gateway_resource" "login" {
+  rest_api_id = "${aws_api_gateway_rest_api.example_api.id}"
+  parent_id   = "${aws_api_gateway_rest_api.example_api.root_resource_id}"
+  path_part   = "login"
+}
+
+resource "aws_api_gateway_method" "login" {
+  rest_api_id = "${aws_api_gateway_rest_api.example_api.id}"
+  resource_id = "${aws_api_gateway_resource.login.id}"
+  http_method = "POST"
+
+  authorization = "NONE"
+}
+
 resource "aws_api_gateway_method" "proxy" {
   rest_api_id = "${aws_api_gateway_rest_api.example_api.id}"
   resource_id = "${aws_api_gateway_resource.proxy.id}"
@@ -28,10 +42,6 @@ resource "aws_api_gateway_method" "proxy_root" {
 
   authorization = "CUSTOM"
   authorizer_id = "${aws_api_gateway_authorizer.api_gateway_lambda_authorizer.id}"
-
-  request_parameters = {
-    "method.request.header.Authorization" = true
-  }
 }
 
 ## AUTH

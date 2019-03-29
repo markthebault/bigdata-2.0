@@ -8,6 +8,24 @@ module "cognito_userpools" {
   cognito_userpools_name = "simple-users"
 }
 
+module "lambda_login" {
+  source = "github.com/markthebault/terraform-aws-lambda"
+
+  function_name = "lambda-${local.name}-apigw-login"
+  runtime       = "nodejs8.10"
+  handler       = "lambda_login.handler"
+
+  source_path = "${path.module}/lambdas/lambda_login"
+
+  environment {
+    variables {
+      COGNITO_USER_POOL   = "${module.cognito_userpools.cognito_user_pool_id}"
+      USER_POOL_CLIENT_ID = "${module.cognito_userpools.cognito_client}"
+      DEBUG_ENABLED       = "true"
+    }
+  }
+}
+
 module "lambda_auth" {
   source = "github.com/markthebault/terraform-aws-lambda"
 
@@ -52,8 +70,12 @@ module "api_gw_resource" {
   apigw_method_proxy_resource_id      = "${module.api_gw.apigw_method_proxy_resource_id}"
   apigw_method_proxy_http_method      = "${module.api_gw.apigw_method_proxy_http_method}"
   lambda_apigw_arn                    = "${module.lambda_api.function_arn}"
+  lambda_apigw_invoked_arn            = "${module.lambda_api.function_invoke_arn}"
 
-  lambda_apigw_invoked_arn = "${module.lambda_api.function_invoke_arn}"
+  apigw_method_login_http_method = "${module.api_gw.apigw_method_login_http_method}"
+  apigw_method_login_resource_id = "${module.api_gw.apigw_method_login_resource_id}"
+  lambda_apigw_login_invoked_arn = "${module.lambda_login.function_invoke_arn}"
+  lambda_apigw_login_arn         = "${module.lambda_login.function_arn}"
 }
 
 module "cognito_dlk_group" {
