@@ -18,7 +18,7 @@ const authenticationData = {
   Password: userPasswordCurrent
 }
 
-console.log('auth', JSON.stringify(authenticationData, null, 2));
+
 
 const AmazonCognitoIdentity = require('amazon-cognito-identity-js')
 const authenticationDetails = new AmazonCognitoIdentity.AuthenticationDetails(authenticationData)
@@ -47,8 +47,9 @@ cognitoUser.authenticateUser(authenticationDetails, {
     let jwtWithAttributes = result.idToken.jwtToken
     let payload = result.idToken.payload
 
-    console.log('JWT: ', jwtWithAttributes)
-    console.log('payload', JSON.stringify(payload, null, 2));
+    console.log('', jwtWithAttributes)
+    // console.log('JWT: ', jwtWithAttributes)
+    // console.log('payload', JSON.stringify(payload, null, 2));
   },
 
   onFailure: function (error) {

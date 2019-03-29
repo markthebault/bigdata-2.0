@@ -44,8 +44,9 @@ cognitoUser.authenticateUser(authenticationDetails, {
     let jwtWithAttributes = result.idToken.jwtToken
     let payload = result.idToken.payload
 
-    console.log('JWT: ', jwtWithAttributes)
-    console.log('payload', JSON.stringify(payload, null, 2));
+    console.log('', jwtWithAttributes)
+    // console.log('JWT: ', jwtWithAttributes)
+    // console.log('payload', JSON.stringify(payload, null, 2));
   },
 
   onFailure: function (error) {
