@@ -1,5 +1,5 @@
-./aws-data-lake-solution*
-./example-tf-apigw-cog*
+aws-data-lake-solution/*
+example-tf-apigw-cog
 
 
 # Created by https://www.gitignore.io/api/terraform,visualstudiocode
