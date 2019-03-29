@@ -2,6 +2,12 @@ locals {
   name = "simple-api"
 }
 
+module "cognito_userpools" {
+  source = "modules/cognito-userpools"
+
+  cognito_userpools_name = "simple-users"
+}
+
 module "lambda_auth" {
   source = "github.com/markthebault/terraform-aws-lambda"
 
@@ -10,6 +16,13 @@ module "lambda_auth" {
   handler       = "lambda_authorizer.handler"
 
   source_path = "${path.module}/lambdas/lambda_authorizer"
+
+  environment {
+    variables {
+      COGNITO_USER_POOL = "${module.cognito_userpools.cognito_user_pool_id}"
+      DEBUG_ENABLED     = "true"
+    }
+  }
 }
 
 module "lambda_api" {
@@ -41,4 +54,28 @@ module "api_gw_resource" {
   lambda_apigw_arn                    = "${module.lambda_api.function_arn}"
 
   lambda_apigw_invoked_arn = "${module.lambda_api.function_invoke_arn}"
+}
+
+module "cognito_dlk_group" {
+  source = "modules/cognito-dlk-admin-group"
+
+  cognito_group_name   = "dlk-admin"
+  cognito_user_pool_id = "${module.cognito_userpools.cognito_user_pool_id}"
+
+  cognito_additional_policy = true
+
+  cognitor_group_additional_policy = <<JSON
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [
+        "*"
+      ],
+      "Effect": "Allow",
+      "Resource": "*"
+    }
+  ]
+}
+JSON
 }
