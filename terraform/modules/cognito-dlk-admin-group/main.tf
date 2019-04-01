@@ -55,37 +55,3 @@ resource "aws_iam_policy_attachment" "test-attach" {
   roles      = ["${aws_iam_role.group_role.name}"]
   policy_arn = "${aws_iam_policy.policy.arn}"
 }
-
-module "dynamodb_table_dataset_landing" {
-  source    = "git::https://github.com/cloudposse/terraform-aws-dynamodb.git?ref=master"
-  namespace = "datalake"
-  stage     = "dev"
-  name      = "landing_bucket"
-  hash_key  = "dataset_key"
-  range_key = "metadata"
-
-  autoscale_write_target       = 3
-  autoscale_read_target        = 3
-  autoscale_min_read_capacity  = 1
-  autoscale_max_read_capacity  = 5
-  autoscale_min_write_capacity = 1
-  autoscale_max_write_capacity = 5
-  enable_autoscaler            = true
-}
-
-module "dynamodb_table_datalake" {
-  source    = "git::https://github.com/cloudposse/terraform-aws-dynamodb.git?ref=master"
-  namespace = "datalake"
-  stage     = "dev"
-  name      = "datalake"
-  hash_key  = "dataset_key"
-  range_key = "metadata"
-
-  autoscale_write_target       = 3
-  autoscale_read_target        = 3
-  autoscale_min_read_capacity  = 1
-  autoscale_max_read_capacity  = 5
-  autoscale_min_write_capacity = 1
-  autoscale_max_write_capacity = 5
-  enable_autoscaler            = true
-}

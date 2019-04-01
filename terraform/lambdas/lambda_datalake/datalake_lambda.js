@@ -1,7 +1,9 @@
 console.log('Loading function');
 
 const AWS_REGION_STRING = process.env.AWS_REGION
+const DYNAMO_LANDING_TABLE_NAME = process.env.DYNAMO_LANDING_TABLE_NAME
 const COGNITO_USER_POOL = process.env.COGNITO_USER_POOL
+const S3_LANDING_BUCKET = process.env.S3_LANDING_BUCKET
 const COGNITO_URI = `https://cognito-idp.${AWS_REGION_STRING}.amazonaws.com/${COGNITO_USER_POOL}`
 const DEBUG_ENABLED = process.env.DEBUG_ENABLED.toUpperCase() == 'TRUE'
 
@@ -13,7 +15,7 @@ const AWS = require('aws-sdk');
 
 
 var sts = new AWS.STS();
-
+var ddb = new AWS.DynamoDB();
 
 
 
@@ -41,6 +43,8 @@ exports.handler = router.handler({
 async function declareDataset(request) {
   let dataset = request.body.dataset
   let datasetPath = request.body.datasetPath
+  let datasetMetadata = request.body.metadata
+  const datasetKey = datasetPath + dataset
 
   if (DEBUG_ENABLED) console.log('dataset: ', JSON.stringify(dataset, null, 2))
   if (DEBUG_ENABLED) console.log('datasetPath: ', JSON.stringify(datasetPath, null, 2))
@@ -52,6 +56,7 @@ async function declareDataset(request) {
   else {
 
     roles = jwtExtractRoles(request)
+    user = jwtExtractUser(request)
 
     let sts_params = {
       RoleArn: roles[0],
@@ -83,13 +88,47 @@ async function declareDataset(request) {
       Expiration: data.Credentials.Expiration
     }
 
-    //TODO: register landing dataset in dynamo
+
+    const url = "s3://" + S3_LANDING_BUCKET + datasetKey
+
+    //Register landing dataset in dynamo
+    var params = {
+      TableName: DYNAMO_LANDING_TABLE_NAME,
+      Item: {
+        'dataset_key': { S: datasetKey },
+        'uri': { S: url },
+        'metadata': { S: datasetMetadata },
+        'user': { S: user },
+        'algo': { S: 'ETL_IMPORT' },
+        'algo-params': {
+          S: JSON.stringify({
+            inputFileType: 'csv',
+            outputFileType: 'parket',
+            partition: 'NONE',
+            partitionSize: '32Mb'
+          })
+        },
+        'format': { S: 'csv' }
+      }
+    };
+    if (DEBUG_ENABLED) console.log('dynamoparams: ', JSON.stringify(params, null, 2))
+
+    // Call DynamoDB to add the item to the table
+    var response = await ddb.putItem(params, function (err, data) {
+      if (err) {
+        console.log("Error", err);
+      } else {
+        console.log("Success", data);
+      }
+    }).promise();
+    if (DEBUG_ENABLED) console.log('dynamoresponse: ', JSON.stringify(response, null, 2))
+
 
     return done({
       dataset: dataset,
       datasetPath: datasetPath,
       credentials: credentials,
-      url: "s3:/" + datasetPath + "/" + dataset
+      url: url
     })
   }
 }
@@ -133,6 +172,19 @@ function jwtExtractRoles(request) {
   if (DEBUG_ENABLED) console.log('cognitoRoles: ', JSON.stringify(cognitoRoles, null, 2))
 
   return cognitoRoles
+
+}
+
+function jwtExtractUser(request) {
+  let jwtEncoded = request.multiValueHeaders.Authorization[0]
+  if (DEBUG_ENABLED) console.log('jwtEncoded: ', JSON.stringify(jwtEncoded, null, 2))
+
+  let jwtDecoded = jwt.decode(jwtEncoded)
+  if (DEBUG_ENABLED) console.log('jwtDecoded: ', JSON.stringify(jwtDecoded, null, 2))
+
+  let userId = jwtDecoded.sub
+  if (DEBUG_ENABLED) console.log('userId: ', userId)
+  return `user|${userId}`
 
 }
 

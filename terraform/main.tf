@@ -1,5 +1,7 @@
 locals {
-  name = "simple-api"
+  name                = "simple-api"
+  landing_bucket_name = "mth-dlk-landing-bucket"
+  dlk_bucket_name     = "mth-dlk-bucket"
 }
 
 module "cognito_userpools" {
@@ -57,6 +59,9 @@ module "lambda_api" {
       COGNITO_USER_POOL   = "${module.cognito_userpools.cognito_user_pool_id}"
       USER_POOL_CLIENT_ID = "${module.cognito_userpools.cognito_client}"
       DEBUG_ENABLED       = "true"
+
+      DYNAMO_LANDING_TABLE_NAME = "${module.dynamodb_table_dataset_landing.table_name}"
+      S3_LANDING_BUCKET         = "${local.landing_bucket_name}"
     }
   }
 
@@ -66,11 +71,21 @@ module "lambda_api" {
 {
     "Version": "2012-10-17",
     "Statement": [
-        {
-            "Effect": "Allow",
-            "Action": "sts:AssumeRole",
-            "Resource": "*"
-        }
+      {
+          "Effect": "Allow",
+          "Action": "sts:AssumeRole",
+          "Resource": "*"
+      },
+      {
+        "Action": [
+            "*"
+          ],
+        "Effect": "Allow",
+        "Resource": [
+          "${module.dynamodb_table_dataset_landing.table_arn}",
+          "${module.dynamodb_table_datalake.table_arn}"
+        ]
+      }
     ]
 }
 JSON
@@ -123,4 +138,43 @@ module "cognito_dlk_group" {
   ]
 }
 JSON
+}
+
+module "dynamodb_table_dataset_landing" {
+  source    = "git::https://github.com/markthebault/terraform-aws-dynamodb.git?ref=f21f7b9f55fae9c4ffad351b2ab0acd980dab41e"
+  namespace = "datalake"
+  stage     = "dev"
+  name      = "landing_bucket"
+  hash_key  = "dataset_key"
+  range_key = "uri"
+
+  autoscale_write_target       = 3
+  autoscale_read_target        = 3
+  autoscale_min_read_capacity  = 1
+  autoscale_max_read_capacity  = 5
+  autoscale_min_write_capacity = 1
+  autoscale_max_write_capacity = 5
+  enable_autoscaler            = true
+}
+
+module "dynamodb_table_datalake" {
+  source    = "git::https://github.com/markthebault/terraform-aws-dynamodb.git?ref=f21f7b9f55fae9c4ffad351b2ab0acd980dab41e"
+  namespace = "datalake"
+  stage     = "dev"
+  name      = "datalake"
+  hash_key  = "dataset_key"
+  range_key = "uri"
+
+  autoscale_write_target       = 3
+  autoscale_read_target        = 3
+  autoscale_min_read_capacity  = 1
+  autoscale_max_read_capacity  = 5
+  autoscale_min_write_capacity = 1
+  autoscale_max_write_capacity = 5
+  enable_autoscaler            = true
+}
+
+module "s3-buckets" {
+  source = "modules/s3-dlk-buckets"
+  names  = ["${local.landing_bucket_name}", "${local.dlk_bucket_name}"]
 }

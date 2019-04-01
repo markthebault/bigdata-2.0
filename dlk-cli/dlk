@@ -13,21 +13,30 @@ login(){
     # read -s password
     password="4iM2N%aS565"
 
-	token=$(curl -d '{"username":"'${username}'", "password":"'${password}'"}' -H "Content-Type: application/json" -X POST ${DLK_API_URL}/login | jq '.token')
+	token=$(curl -s -d '{"username":"'${username}'", "password":"'${password}'"}' -H "Content-Type: application/json" -X POST ${DLK_API_URL}/login | jq '.token')
     echo "Run in your shell"
     echo "export JWT=$token"
 }
 
 declare_dataset(){
 
-    if [[ $# -ne 2 ]] ; then
-        echo "USAGE: $0 declare_dataset {dataset} {datasetPath}"
+    if [[ $# -lt 2 ]] ; then
+        echo "USAGE: $0 declare_dataset {dataset} {datasetPath} {metadata}"
         exit 0
     fi
     dataset=$1
     datasetPath=$2
+    metadata=$3
 
-    curl -s -X POST ${DLK_API_URL}/declare-dataset -H "Authorization: $JWT" --data '{"dataset":"'${dataset}'","datasetPath":"'${datasetPath}'"}'
+    result=$(curl -s -X POST ${DLK_API_URL}/declare-dataset -H "Authorization: $JWT" --data '{"dataset":"'${dataset}'","datasetPath":"'${datasetPath}'", "metadata":"'${metadata}'"}')
+    
+    export AWS_ACCESS_KEY_ID=$(echo $result | jq -r '.credentials.AccessKeyId')
+    export AWS_SECRET_ACCESS_KEY=$(echo $result | jq -r '.credentials.SecretAccessKey')
+    export AWS_SESSION_TOKEN=$(echo $result | jq -r '.credentials.SessionToken')
+    uri=$(echo $result | jq -r '.url')
+
+    aws s3 cp $dataset $uri
+    # echo $result
 }
 
 
