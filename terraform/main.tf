@@ -78,12 +78,14 @@ module "lambda_api" {
       },
       {
         "Action": [
-            "*"
+            "dynamodb:*"
           ],
         "Effect": "Allow",
         "Resource": [
           "${module.dynamodb_table_dataset_landing.table_arn}",
-          "${module.dynamodb_table_datalake.table_arn}"
+          "${module.dynamodb_table_datalake.table_arn}",
+          "${module.dynamodb_table_dataset_landing.table_arn}/*",
+          "${module.dynamodb_table_datalake.table_arn}/*"
         ]
       }
     ]

@@ -35,10 +35,64 @@ exports.handler = router.handler({
         path: '/declare-dataset',
         method: 'POST',
         action: (request, context) => declareDataset(request)
+      },
+      {
+        // request-path-pattern with a path variable:
+        path: '/declare-dataset-uploaded',
+        method: 'POST',
+        action: (request, context) => declareDatasetUploaded(request)
       }
     ]
   }
 });
+
+async function declareDatasetUploaded(request) {
+  let dataset = request.body.dataset
+  let datasetPath = request.body.datasetPath
+  const datasetKey = datasetPath + dataset
+  const url = "s3://" + S3_LANDING_BUCKET + datasetKey
+
+  jwtValidateToken(request)
+
+
+  var params = {
+    TableName: DYNAMO_LANDING_TABLE_NAME,
+    Key: {
+      'dataset_key': { S: datasetKey },
+      'uri': { S: url }
+    }
+  };
+  if (DEBUG_ENABLED) console.log('params: ', JSON.stringify(params, null, 2))
+
+
+  // Get the dataset item
+  var item = await ddb.getItem(params, function (err, data) {
+    if (err) {
+      console.log("Error", err);
+    } else {
+      console.log("Success", data);
+    }
+  }).promise();
+  if (DEBUG_ENABLED) console.log('dynamoitem: ', JSON.stringify(item, null, 2))
+
+  //change the status in dynamodb
+  item.Item.uploaded = { S: 'TRUE' }
+  item.TableName = DYNAMO_LANDING_TABLE_NAME
+
+  await ddb.putItem(item, function (err, data) {
+    if (err) {
+      console.log("Error", err);
+    } else {
+      console.log("Success", data);
+    }
+  }).promise();
+
+
+  return done({
+    dataset: dataset,
+    message: "Uploaded status set to TRUE"
+  })
+}
 
 async function declareDataset(request) {
   let dataset = request.body.dataset
@@ -100,6 +154,7 @@ async function declareDataset(request) {
         'metadata': { S: datasetMetadata },
         'user': { S: user },
         'algo': { S: 'ETL_IMPORT' },
+        'uploaded': { S: 'FALSE' },
         'algo-params': {
           S: JSON.stringify({
             inputFileType: 'csv',
@@ -146,16 +201,9 @@ function doAnything(request) {
 
 }
 
-function jwtExtractRoles(request) {
+function jwtValidateToken(request) {
   let jwtEncoded = request.multiValueHeaders.Authorization[0]
-  if (DEBUG_ENABLED) console.log('jwtEncoded: ', JSON.stringify(jwtEncoded, null, 2))
-
   let jwtDecoded = jwt.decode(jwtEncoded)
-  if (DEBUG_ENABLED) console.log('jwtDecoded: ', JSON.stringify(jwtDecoded, null, 2))
-
-  let userId = jwtDecoded.sub
-  if (DEBUG_ENABLED) console.log('userId: ', userId)
-  principalId = `user|${userId}`
 
   if (jwtDecoded.iss != COGNITO_URI) {
     if (DEBUG_ENABLED) console.log("FAILUE: COGNITO_URI does not match JWT")
@@ -167,6 +215,20 @@ function jwtExtractRoles(request) {
     if (DEBUG_ENABLED) console.log("FAILURE: JWT EXPIRED")
     throw "Token expired"
   }
+}
+
+function jwtExtractRoles(request) {
+  let jwtEncoded = request.multiValueHeaders.Authorization[0]
+  if (DEBUG_ENABLED) console.log('jwtEncoded: ', JSON.stringify(jwtEncoded, null, 2))
+
+  let jwtDecoded = jwt.decode(jwtEncoded)
+  if (DEBUG_ENABLED) console.log('jwtDecoded: ', JSON.stringify(jwtDecoded, null, 2))
+
+  let userId = jwtDecoded.sub
+  if (DEBUG_ENABLED) console.log('userId: ', userId)
+  principalId = `user|${userId}`
+
+  jwtValidateToken(request)
 
   let cognitoRoles = jwtDecoded["cognito:roles"]
   if (DEBUG_ENABLED) console.log('cognitoRoles: ', JSON.stringify(cognitoRoles, null, 2))

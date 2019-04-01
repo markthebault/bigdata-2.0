@@ -36,6 +36,8 @@ declare_dataset(){
     uri=$(echo $result | jq -r '.url')
 
     aws s3 cp $dataset $uri
+    #Declare the dataset uploaded to modify the DYNAMO-DB state
+    curl -s -X POST ${DLK_API_URL}/declare-dataset-uploaded -H "Authorization: $JWT" --data '{"dataset":"'${dataset}'","datasetPath":"'${datasetPath}'"}'
     # echo $result
 }
 
