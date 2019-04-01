@@ -18,3 +18,4 @@ show-outputs:
 .build_lambdas:
 	$(MAKE) -C ./lambdas/lambda_authorizer
 	$(MAKE) -C ./lambdas/lambda_login
+	$(MAKE) -C ./lambdas/lambda_datalake

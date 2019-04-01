@@ -48,9 +48,17 @@ module "lambda_api" {
 
   function_name = "lambda-${local.name}-apigw-route"
   runtime       = "nodejs8.10"
-  handler       = "api_lambda.handler"
+  handler       = "datalake_lambda.handler"
 
-  source_path = "${path.module}/lambdas/api_lambda.js"
+  source_path = "${path.module}/lambdas/lambda_datalake"
+
+  environment {
+    variables {
+      COGNITO_USER_POOL   = "${module.cognito_userpools.cognito_user_pool_id}"
+      USER_POOL_CLIENT_ID = "${module.cognito_userpools.cognito_client}"
+      DEBUG_ENABLED       = "true"
+    }
+  }
 }
 
 module "api_gw" {
