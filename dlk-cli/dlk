@@ -1,0 +1,58 @@
+#!/bin/bash
+DLK_API_URL=${DLK_API_URL:-https://12ruo7tat0.execute-api.eu-central-1.amazonaws.com/api}
+DLK_CLI_NAME=dlk
+
+login(){
+
+    if [[ $# -ne 1 ]] ; then
+        echo "USAGE: $0 login {username}"
+        exit 0
+    fi
+    username=$1
+    # echo "Enter your password: "
+    # read -s password
+    password="4iM2N%aS565"
+
+	token=$(curl -d '{"username":"'${username}'", "password":"'${password}'"}' -H "Content-Type: application/json" -X POST ${DLK_API_URL}/login | jq '.token')
+    echo "Run in your shell"
+    echo "export JWT=$token"
+}
+
+declare_dataset(){
+
+    if [[ $# -ne 2 ]] ; then
+        echo "USAGE: $0 declare_dataset {dataset} {datasetPath}"
+        exit 0
+    fi
+    dataset=$1
+    datasetPath=$2
+
+    curl -s -X POST ${DLK_API_URL}/declare-dataset -H "Authorization: $JWT" --data '{"dataset":"'${dataset}'","datasetPath":"'${datasetPath}'"}'
+}
+
+
+
+
+
+functions(){
+
+
+case "$1" in
+        login)
+            shift 1
+	    login "$@"
+            ;;
+         
+        declare_dataset)
+            shift 1
+            declare_dataset "$@"
+            ;;
+         
+        *)
+            echo $"Usage: $0 {login|declare-dataset}"
+            exit 1
+ 
+esac
+}
+
+functions "$@"

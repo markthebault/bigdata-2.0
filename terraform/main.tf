@@ -59,6 +59,21 @@ module "lambda_api" {
       DEBUG_ENABLED       = "true"
     }
   }
+
+  attach_policy = true
+
+  policy = <<JSON
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": "sts:AssumeRole",
+            "Resource": "*"
+        }
+    ]
+}
+JSON
 }
 
 module "api_gw" {
