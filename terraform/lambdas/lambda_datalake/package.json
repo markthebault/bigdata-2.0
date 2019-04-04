@@ -12,6 +12,7 @@
     "aws-lambda-router": "^0.6.1",
     "aws-sdk": "^2.354.0",
     "jsonwebtoken": "^8.3.0",
+    "kubernetes-client": "^6.12.1",
     "node-fetch": "^2.2.1"
   }
 }

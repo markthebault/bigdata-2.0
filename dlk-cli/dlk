@@ -41,6 +41,17 @@ declare_dataset(){
     # echo $result
 }
 
+register_dataset(){
+
+    if [[ $# -ne 2 ]] ; then
+        echo "USAGE: $0 register_dataset {dataset} {datasetPath} "
+        exit 0
+    fi
+    dataset=$1
+    datasetPath=$2
+
+    curl -s -X POST ${DLK_API_URL}/register-dataset -H "Authorization: $JWT" --data '{"dataset":"'${dataset}'","datasetPath":"'${datasetPath}'"}'
+}
 
 
 
@@ -57,6 +68,11 @@ case "$1" in
         declare_dataset)
             shift 1
             declare_dataset "$@"
+            ;;      
+
+        register_dataset)
+            shift 1
+            register_dataset "$@"
             ;;
          
         *)

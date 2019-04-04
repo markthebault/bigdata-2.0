@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="$PROJECT_DIR$/.." vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/.terraform/modules/015fa5450d96deb5a99a46d07bd08523" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/.terraform/modules/01736a086aa61064d548230a25e9702a" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/.terraform/modules/2039d04b7fa6d85d7acc08d05a32feac" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/.terraform/modules/298266d9dc471123c87aec3192a295e6" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/.terraform/modules/2df2b4230456bf7b34b9e85f9a55a434" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/.terraform/modules/4609d7bdb1ecb0569bc0eb6eb3195d36" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/.terraform/modules/5a2951722bdc950ec5c819dda99c8321" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/.terraform/modules/5e4869f25fd8876fdbfd330088177daa" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/.terraform/modules/7cf701aefcb0900efc63864d362fc9ce" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/.terraform/modules/83bb1fa73e2f62434e643046cb6e5550" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/.terraform/modules/891d7869fc4787c85c2be85fb23f4930" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/.terraform/modules/8b1b3dc54b75a1714eaa91a3890af89e" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/.terraform/modules/8ee2bbd442c431f572f44bf62b103727" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/.terraform/modules/90f3c2a3015c3f36bf2a48f800b25d70" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/.terraform/modules/9d10e9f8e87f087e72fafb56169d7f3b" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/.terraform/modules/9fcb7ed0f1d968a26a3a48967133922f" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/.terraform/modules/a5acd84e0f5875f79f4b81588fd2fbeb" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/.terraform/modules/a786b7aa24d5fb49845123f8b0925237" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/.terraform/modules/b004528dfae368a137ba25b44f148938" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/.terraform/modules/b334340e3eb8e0a4e419428a891e28f4" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/.terraform/modules/baebe09894a065532f2843668c53f767" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/.terraform/modules/bca59d2296adb6e44672209fcbead96c" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/.terraform/modules/bf8170662c86082f42c46fe75961a41c" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/.terraform/modules/ca31e39a899770195f05ef5da5d9b1ab" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/.terraform/modules/cd41de081be23af031c8675fcbdd6025" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/.terraform/modules/e223912bad8cb6d5347dc78701627148" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/.terraform/modules/ffd7cef21989cc34a1ac106d06b40d3c" vcs="Git" />
+  </component>
+</project>

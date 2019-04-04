@@ -61,6 +61,7 @@ module "lambda_api" {
       DEBUG_ENABLED       = "true"
 
       DYNAMO_LANDING_TABLE_NAME = "${module.dynamodb_table_dataset_landing.table_name}"
+      DYNAMO_DLK_TABLE_NAME     = "${module.dynamodb_table_datalake.table_name}"
       S3_LANDING_BUCKET         = "${local.landing_bucket_name}"
     }
   }
@@ -86,6 +87,24 @@ module "lambda_api" {
           "${module.dynamodb_table_datalake.table_arn}",
           "${module.dynamodb_table_dataset_landing.table_arn}/*",
           "${module.dynamodb_table_datalake.table_arn}/*"
+        ]
+      },
+      {
+        "Action": [
+            "sns:*"
+          ],
+        "Effect": "Allow",
+        "Resource": [
+          "${module.dlk_sns_topic.sns_topic_arn}"
+        ]
+      },
+      {
+        "Action": [
+            "sns:*"
+          ],
+        "Effect": "Allow",
+        "Resource": [
+          "${module.k8s_sns_topic.sns_topic_arn}"
         ]
       }
     ]
@@ -180,3 +199,16 @@ module "s3-buckets" {
   source = "modules/s3-dlk-buckets"
   names  = ["${local.landing_bucket_name}", "${local.dlk_bucket_name}"]
 }
+
+module "dlk_sns_topic" {
+  source = "modules/sns-dlk"
+
+  sns_topic_name      = "sns-dlk-lambda-topic"
+  attached_lambda_arn = "${module.lambda_api.function_arn}"
+}
+
+# resource "aws_lambda_event_source_mapping" "dlk_sns_topic" {
+#   event_source_arn = "${module.dlk_sns_topic.sns_topic_arn}"
+#   function_name    = "${module.lambda_api.function_arn}"
+# }
+

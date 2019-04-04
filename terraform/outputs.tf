@@ -13,3 +13,19 @@ output "cognito_client" {
 output "cognito_group_name" {
   value = "${module.cognito_dlk_group.cognito_group_name}"
 }
+
+output "eks_kubeconfig" {
+  value = "${module.eks_dlk.kubeconfig}"
+}
+
+output "eks_kubeconfig_filename" {
+  value = "${module.eks_dlk.kubeconfig_filename}"
+}
+
+output "eks_workers_asg_names" {
+  value = "${module.eks_dlk.workers_asg_names}"
+}
+
+output "lambda_dlk_k8s_intraction_arn" {
+  value = "${module.lambda_api_k8s_interact.function_arn}"
+}

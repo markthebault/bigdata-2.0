@@ -2,6 +2,7 @@ console.log('Loading function');
 
 const AWS_REGION_STRING = process.env.AWS_REGION
 const DYNAMO_LANDING_TABLE_NAME = process.env.DYNAMO_LANDING_TABLE_NAME
+const DYNAMO_DLK_TABLE_NAME = process.env.DYNAMO_DLK_TABLE_NAME
 const COGNITO_USER_POOL = process.env.COGNITO_USER_POOL
 const S3_LANDING_BUCKET = process.env.S3_LANDING_BUCKET
 const COGNITO_URI = `https://cognito-idp.${AWS_REGION_STRING}.amazonaws.com/${COGNITO_USER_POOL}`
@@ -41,10 +42,51 @@ exports.handler = router.handler({
         path: '/declare-dataset-uploaded',
         method: 'POST',
         action: (request, context) => declareDatasetUploaded(request)
-      }
+      },
+      {
+        // request-path-pattern with a path variable:
+        path: '/register-dataset',
+        method: 'POST',
+        action: (request, context) => registerDataset(request)
+      },
+      //Example Event from SNS
+      // {
+      //   // a regex to match the content of the SNS-Subject:
+      //   subject: /.*/,
+      //   // Attention: the message is JSON-stringified
+      //   action: (sns, context) => service.doSomething(JSON.parse(sns.Message))
+      // }
+      //Example event from SQS
+      // {
+      //   // match complete SQS ARN:
+      //   source: 'arn:aws:sqs:us-west-2:594035263019:aticle-import',
+      //   // Attention: the messages Array is JSON-stringified
+      //   action: (messages, context) => messages.forEach(message => console.log(JSON.parse(message)))
+      // },
     ]
   }
 });
+
+async function registerDataset(request) {
+  let dataset = request.body.dataset
+  let datasetPath = request.body.datasetPath
+  const datasetKey = datasetPath + dataset
+  const url = "s3://" + S3_LANDING_BUCKET + datasetKey
+
+  jwtValidateToken(request)
+
+  //////////////TODO do some fancy stuff here
+  // call kubernetes ETL process
+  // Pass it the dynamodb key to proceed
+
+
+
+
+  return done({
+    dataset: dataset,
+    message: "Registration in process"
+  })
+}
 
 async function declareDatasetUploaded(request) {
   let dataset = request.body.dataset
