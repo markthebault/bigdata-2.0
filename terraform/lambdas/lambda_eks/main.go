@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"os"
 
-	eksauth "github.com/chankh/eksutil/pkg/auth"
+	eksauth "./pkg/auth"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -15,7 +15,7 @@ import (
 )
 
 func main() {
-	if os.Getenv("DEBUG_ENABLED") == "true" {
+	if os.Getenv("ENV") == "DEBUG" {
 		log.SetLevel(log.DebugLevel)
 	}
 

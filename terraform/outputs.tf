@@ -26,6 +26,6 @@ output "eks_workers_asg_names" {
   value = "${module.eks_dlk.workers_asg_names}"
 }
 
-output "lambda_dlk_k8s_intraction_arn" {
-  value = "${module.lambda_api_k8s_interact.function_arn}"
+output "role_lambda_dlk_k8s_intraction_arn" {
+  value = "${module.lambda_api_k8s_interact.role_arn}"
 }

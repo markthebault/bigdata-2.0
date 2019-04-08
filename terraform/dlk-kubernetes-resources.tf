@@ -30,18 +30,38 @@ module "vpc" {
   }
 
   public_subnet_tags = {
-    "tags.kubernetes.io/cluster/eks-dlk-cluster" = "shared"
+    "tags.kubernetes.io/cluster/${local.eks_cluster_name}" = "shared"
   }
 }
 
-module "eks_dlk" {
-  source       = "terraform-aws-modules/eks/aws"
-  cluster_name = "${local.eks_cluster_name}"
-  subnets      = "${module.vpc.public_subnets}"
-  vpc_id       = "${module.vpc.vpc_id}"
+module "k8s_role_master" {
+  source = "modules/k8s-admin-role"
 
-  #write_kubeconfig = false
-  kubeconfig_name = "kubeconfig.yml"
+  iam_role_name = "k8s-admin"
+  tags          = "${var.tags}"
+}
+
+module "eks_dlk" {
+  source          = "terraform-aws-modules/eks/aws"
+  cluster_name    = "${local.eks_cluster_name}"
+  cluster_version = "1.12"
+  subnets         = "${module.vpc.public_subnets}"
+  vpc_id          = "${module.vpc.vpc_id}"
+
+  map_roles_count = 1
+
+  map_roles = [
+    {
+      role_arn = "${module.lambda_api_k8s_interact.role_arn}"
+      username = "lambda"
+      group    = "system:masters"
+    },
+    {
+      role_arn = "${module.k8s_role_master.iam_role_arn}"
+      username = "aws-admin"
+      group    = "system:masters"
+    },
+  ]
 
   worker_groups = [
     {
@@ -78,7 +98,7 @@ module "lambda_api_k8s_interact" {
   environment {
     variables {
       DEBUG_ENABLED = "true"
-      CLUSTER_NAME  = "${module.eks_dlk.cluster_id}"
+      CLUSTER_NAME  = "${local.eks_cluster_name}"
 
       #DYNAMO_LANDING_TABLE_NAME = "${module.dynamodb_table_dataset_landing.table_name}"
       #DYNAMO_DLK_TABLE_NAME     = "${module.dynamodb_table_datalake.table_name}"
@@ -121,7 +141,7 @@ module "lambda_api_k8s_interact" {
       {
         "Effect": "Allow",
         "Action": [
-          "eks:*"
+          "eks:DescribeCluster"
         ],
         "Resource": [
           "*"

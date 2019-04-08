@@ -5,12 +5,16 @@ metadata:
   namespace: kube-system
 data:
   mapRoles: |
-    - rolearn: arn:aws:iam::787257827481:role/eks-dlk-cluster20190403150548420700000005
+    - rolearn: arn:aws:iam::787257827481:role/eks-dlk-cluster20190408120137703400000007
       username: system:node:{{EC2PrivateDNSName}}
       groups:
         - system:bootstrappers
         - system:nodes
 
+    - rolearn: arn:aws:iam::787257827481:role/lambda-simple-api-apigw-k8s-interactions
+      username: lambda
+      groups:
+        - system:masters
 
   mapUsers: |
 
