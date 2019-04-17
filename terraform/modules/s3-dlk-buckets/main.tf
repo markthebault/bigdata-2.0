@@ -18,3 +18,7 @@ resource "aws_s3_bucket" "dlk" {
 output "s3_bucket_id" {
   value = "${aws_s3_bucket.dlk.*.id}"
 }
+
+output "s3_bucket_arn" {
+  value = "${aws_s3_bucket.dlk.*.arn}"
+}

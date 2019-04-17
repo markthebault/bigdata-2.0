@@ -29,3 +29,11 @@ output "eks_workers_asg_names" {
 output "role_lambda_dlk_k8s_intraction_arn" {
   value = "${module.lambda_api_k8s_interact.role_arn}"
 }
+
+# output "kube2iam_role_arn" {
+#   value = "${aws_iam_role.kube2iam_role.arn}"
+# }
+
+output "etl_role_arn" {
+  value = "${aws_iam_role.etl_role.arn}"
+}

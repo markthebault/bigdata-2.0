@@ -41,6 +41,28 @@ module "k8s_role_master" {
   tags          = "${var.tags}"
 }
 
+resource "aws_iam_policy" "k8s_worker_additional_policy" {
+  name = "policy-${local.eks_cluster_name}-assume-role"
+  path = "/"
+
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [
+        "sts:AssumeRole"
+      ],
+      "Effect": "Allow",
+      "Resource": [
+        "${aws_iam_role.etl_role.arn}"
+      ]
+    }
+  ]
+}
+EOF
+}
+
 module "eks_dlk" {
   source          = "terraform-aws-modules/eks/aws"
   cluster_name    = "${local.eks_cluster_name}"
@@ -65,11 +87,16 @@ module "eks_dlk" {
 
   worker_groups = [
     {
-      instance_type      = "t2.small"
-      asg_max_size       = 9
-      worker_group_count = 3
+      instance_type        = "t2.small"
+      asg_max_size         = 9
+      worker_group_count   = 3
+      asg_desired_capacity = 2
+      subnets              = "${join(",", module.vpc.public_subnets)}"
     },
   ]
+
+  workers_additional_policies       = ["${aws_iam_policy.k8s_worker_additional_policy.arn}"]
+  workers_additional_policies_count = 1
 
   tags = "${merge(local.tags, var.tags)}"
 }
